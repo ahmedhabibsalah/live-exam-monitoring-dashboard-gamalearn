@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAppDispatch } from './useAppDispatch'
 import { hydrateSessions } from '@/store/slices/sessionsSlice'
@@ -9,8 +9,12 @@ import type { ExamSession, SessionEvent } from '@/types'
 
 export function useHydrateSessions() {
   const dispatch = useAppDispatch()
+  const loaded = useRef(false)
 
   useEffect(() => {
+    if (loaded.current) return
+    loaded.current = true
+
     async function load() {
       const { data, error } = await supabase
         .from('sessions')
@@ -18,7 +22,6 @@ export function useHydrateSessions() {
         .order('risk_score', { ascending: false })
 
       if (error || !data || data.length === 0) {
-        // Fallback to mock data
         console.warn('Supabase empty or error — using mock data')
         const { sessions, events } = getMockData()
         const eventsRecord: Record<string, SessionEvent[]> = {}
@@ -46,7 +49,6 @@ export function useHydrateSessions() {
         notes: row.notes ?? [],
       }))
 
-      // Events loaded lazily per session — start with empty
       dispatch(hydrateSessions({ sessions, events: {} }))
     }
 
