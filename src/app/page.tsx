@@ -7,6 +7,7 @@ import { selectIsLoaded } from '@/store/slices/sessionsSlice'
 import { Navbar } from '@/components/dashboard/Navbar'
 import { FilterBar } from '@/components/dashboard/FilterBar'
 import { SessionsList } from '@/components/dashboard/SessionsList'
+import { SessionDetail } from '@/components/dashboard/SessionDetail'
 
 export default function Home() {
   useHydrateSessions()
@@ -15,14 +16,39 @@ export default function Home() {
   const isLoaded = useAppSelector(selectIsLoaded)
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+      }}
+    >
       <Navbar />
       <FilterBar />
 
       {!isLoaded ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--accent-blue)] border-t-transparent" />
-          <p className="text-sm text-[var(--text-muted)]">
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+          }}
+        >
+          <div
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              border: '2px solid var(--accent-blue)',
+              borderTopColor: 'transparent',
+              animation: 'spin 0.8s linear infinite',
+            }}
+          />
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             Loading sessions...
           </p>
         </div>
@@ -38,6 +64,8 @@ export default function Home() {
           <SessionsList />
         </div>
       )}
+
+      <SessionDetail />
     </div>
   )
 }
