@@ -31,6 +31,19 @@ const sessionsSlice = createSlice({
         events: Record<string, SessionEvent[]>
       }>
     ) {
+      console.log(
+        'HYDRATE called with',
+        action.payload.sessions.length,
+        'sessions'
+      )
+      console.log(
+        'Sample statuses:',
+        action.payload.sessions.slice(0, 5).map((s) => s.status)
+      )
+      console.log(
+        'Sample scores:',
+        action.payload.sessions.slice(0, 5).map((s) => s.riskScore)
+      )
       state.items = action.payload.sessions
       state.events = action.payload.events
       state.isLoaded = true

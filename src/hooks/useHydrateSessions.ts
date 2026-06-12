@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAppDispatch } from './useAppDispatch'
 import { hydrateSessions } from '@/store/slices/sessionsSlice'
-import { getMockData } from '@/lib/mockData'
 import type { ExamSession, SessionEvent } from '@/types'
 
 export function useHydrateSessions() {
@@ -16,40 +15,50 @@ export function useHydrateSessions() {
     loaded.current = true
 
     async function load() {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .order('risk_score', { ascending: false })
+      const pageSize = 1000
+      const totalPages = 10
+      const allRows: Record<string, unknown>[] = []
 
-      if (error || !data || data.length === 0) {
-        console.warn('Supabase empty or error — using mock data')
-        const { sessions, events } = getMockData()
-        const eventsRecord: Record<string, SessionEvent[]> = {}
-        events.forEach((v, k) => {
-          eventsRecord[k] = v
-        })
-        dispatch(hydrateSessions({ sessions, events: eventsRecord }))
-        return
+      for (let page = 0; page < totalPages; page++) {
+        const { data, error } = await supabase
+          .from('sessions')
+          .select('*')
+          .order('risk_score', { ascending: false })
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) {
+          console.error(`Page ${page} error:`, error)
+          break
+        }
+
+        if (!data || data.length === 0) break
+
+        allRows.push(...data)
+
+        if (data.length < pageSize) break
       }
 
-      const sessions: ExamSession[] = data.map((row) => ({
-        id: row.id,
-        candidate: row.candidate,
-        examId: row.exam_id,
-        examName: row.exam_name,
-        status: row.status,
-        riskScore: row.risk_score,
-        riskLevel: row.risk_level,
-        startedAt: row.started_at,
-        duration: row.duration,
-        flagCount: row.flag_count,
-        criticalFlagCount: row.critical_flag_count,
-        lastEventAt: row.last_event_at,
-        proctorId: row.proctor_id,
-        notes: row.notes ?? [],
+      console.log('Total rows fetched:', allRows.length)
+
+      const sessions: ExamSession[] = allRows.map((row) => ({
+        id: row.id as string,
+        candidate: row.candidate as ExamSession['candidate'],
+        examId: row.exam_id as string,
+        examName: row.exam_name as string,
+        status: row.status as ExamSession['status'],
+        riskScore: row.risk_score as number,
+        riskLevel: row.risk_level as ExamSession['riskLevel'],
+        startedAt: row.started_at as string,
+        duration: row.duration as number,
+        flagCount: row.flag_count as number,
+        criticalFlagCount: row.critical_flag_count as number,
+        lastEventAt: row.last_event_at as string,
+        proctorId: row.proctor_id as string | null,
+        notes: (row.notes as string[]) ?? [],
       }))
 
-      dispatch(hydrateSessions({ sessions, events: {} }))
+      const eventsRecord: Record<string, SessionEvent[]> = {}
+      dispatch(hydrateSessions({ sessions, events: eventsRecord }))
     }
 
     load()

@@ -189,8 +189,8 @@ export function generateSessions(count: number = 10000): {
 
   // Weight distribution: mostly active/idle, some flagged, few disconnected
   const statusWeights: SessionStatus[] = [
-    ...Array(50).fill('active'),
-    ...Array(25).fill('idle'),
+    ...Array(55).fill('active'),
+    ...Array(20).fill('idle'),
     ...Array(12).fill('flagged'),
     ...Array(8).fill('disconnected'),
     ...Array(5).fill('completed'),
@@ -203,10 +203,10 @@ export function generateSessions(count: number = 10000): {
     const status = randomItem(statusWeights)
     const eventCount =
       status === 'flagged'
-        ? randomInt(5, 20)
+        ? randomInt(2, 6)
         : status === 'active'
-          ? randomInt(0, 8)
-          : randomInt(0, 4)
+          ? randomInt(0, 3)
+          : randomInt(0, 2)
 
     const sessionEvents = generateEvents(sessionId, eventCount, baseTime)
     const suspiciousEvents = sessionEvents.filter((e) =>
