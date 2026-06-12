@@ -28,10 +28,16 @@ interface Props {
 export function StatusBadge({ status }: Props) {
   return (
     <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium capitalize',
-        STATUS_STYLES[status]
-      )}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        borderRadius: '9999px',
+        padding: '4px 10px',
+        fontSize: '12px',
+        fontWeight: 500,
+        textTransform: 'capitalize',
+      }}
+      className={STATUS_STYLES[status]}
     >
       <span className={cn('h-1.5 w-1.5 rounded-full', STATUS_DOT[status])} />
       {status}

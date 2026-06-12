@@ -8,26 +8,63 @@ import { setPanelView } from '@/store/slices/uiSlice'
 import { selectPanelView } from '@/store/slices/uiSlice'
 import { selectDashboardStats } from '@/store/slices/sessionsSlice'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function Navbar() {
   const dispatch = useAppDispatch()
   const view = useAppSelector(selectPanelView)
   const stats = useAppSelector(selectDashboardStats)
+  const pathname = usePathname()
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
       <div className="flex h-14 items-center justify-between px-4 md:px-6">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-[var(--accent-blue)]" />
-          <span className="font-semibold tracking-tight text-[var(--text-primary)]">
-            ExamGuard
-          </span>
-          {stats.criticalSessions > 0 && (
-            <span className="rounded-full bg-[var(--status-critical)] px-2 py-0.5 text-xs font-medium text-white">
-              {stats.criticalSessions} critical
+        {/* Logo + nav */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-[var(--accent-blue)]" />
+            <span className="font-semibold tracking-tight text-[var(--text-primary)]">
+              ExamGuard
             </span>
-          )}
+            {stats.criticalSessions > 0 && (
+              <span className="rounded-full bg-[var(--status-critical)] px-2 py-0.5 text-xs font-medium text-white">
+                {stats.criticalSessions} critical
+              </span>
+            )}
+          </div>
+
+          {/* Nav links */}
+          <nav style={{ display: 'flex', gap: '4px' }}>
+            {[
+              { href: '/', label: 'Monitor' },
+              { href: '/analytics', label: 'Analytics' },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  backgroundColor:
+                    pathname === link.href
+                      ? 'var(--bg-elevated)'
+                      : 'transparent',
+                  color:
+                    pathname === link.href
+                      ? 'var(--text-primary)'
+                      : 'var(--text-muted)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         {/* Center — quick stats */}
