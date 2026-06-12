@@ -14,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <body
+        style={{
+          backgroundColor: 'var(--bg-primary)',
+          color: 'var(--text-primary)',
+        }}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

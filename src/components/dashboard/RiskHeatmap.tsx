@@ -46,7 +46,7 @@ function buildHeatmapData(sessions: ExamSession[]): {
     })
   })
 
-  const exams = [...new Set(cells.map((c) => c.examName))].slice(0, 8)
+  const exams = [...new Set(cells.map((c) => c.examName))].slice(0, 10)
   const countries = [...new Set(cells.map((c) => c.country))]
     .sort((a, b) => {
       const aTotal = cells
@@ -57,13 +57,14 @@ function buildHeatmapData(sessions: ExamSession[]): {
         .reduce((s, c) => s + c.avgRisk, 0)
       return bTotal - aTotal
     })
-    .slice(0, 12)
+    .slice(0, 15)
 
   return { cells, exams, countries }
 }
 
 export function RiskHeatmap() {
   const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const sessions = useAppSelector(selectAllSessions)
 
   const { cells, exams, countries } = useMemo(
@@ -72,20 +73,19 @@ export function RiskHeatmap() {
   )
 
   useEffect(() => {
-    if (!svgRef.current || cells.length === 0) return
+    if (!svgRef.current || !containerRef.current || cells.length === 0) return
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
-    const margin = { top: 20, right: 20, bottom: 80, left: 130 }
-    const containerWidth = svgRef.current.parentElement?.clientWidth || 600
-    const width = containerWidth - margin.left - margin.right
-    const cellSize = Math.max(28, Math.min(48, width / exams.length))
-    const height = countries.length * cellSize
+    const containerWidth = containerRef.current.clientWidth
+    const margin = { top: 10, right: 20, bottom: 100, left: 120 }
+    const innerWidth = containerWidth - margin.left - margin.right
+    const cellSize = Math.floor(innerWidth / exams.length)
+    const innerHeight = countries.length * cellSize
+    const totalHeight = innerHeight + margin.top + margin.bottom
 
-    svg
-      .attr('width', containerWidth)
-      .attr('height', height + margin.top + margin.bottom)
+    svg.attr('width', containerWidth).attr('height', totalHeight)
 
     const g = svg
       .append('g')
@@ -96,18 +96,23 @@ export function RiskHeatmap() {
       .domain(exams)
       .range([0, exams.length * cellSize])
       .padding(0.05)
-    const y = d3.scaleBand().domain(countries).range([0, height]).padding(0.05)
+
+    const y = d3
+      .scaleBand()
+      .domain(countries)
+      .range([0, innerHeight])
+      .padding(0.05)
 
     const colorScale = d3
       .scaleSequential()
       .domain([0, 100])
       .interpolator(d3.interpolateRgb('#1a2340', '#ef4444'))
 
-    // Cells
     const cellMap = new Map(
       cells.map((c) => [`${c.examName}|||${c.country}`, c])
     )
 
+    // Draw cells
     exams.forEach((exam) => {
       countries.forEach((country) => {
         const cell = cellMap.get(`${exam}|||${country}`)
@@ -121,17 +126,16 @@ export function RiskHeatmap() {
           .attr('height', y.bandwidth())
           .attr('rx', 3)
           .attr('fill', risk > 0 ? colorScale(risk) : '#151d35')
-          .attr('stroke', '#1e2a45')
-          .attr('stroke-width', 1)
+          .attr('stroke', '#0a0e1a')
+          .attr('stroke-width', 2)
           .style('cursor', risk > 0 ? 'pointer' : 'default')
 
         if (risk > 0) {
           rect
             .on('mouseover', function (event) {
               d3.select(this).attr('stroke', '#3b82f6').attr('stroke-width', 2)
-
               tooltip
-                .style('opacity', 1)
+                .style('opacity', '1')
                 .html(
                   `
                   <div style="font-weight:600;margin-bottom:4px">${country}</div>
@@ -141,73 +145,66 @@ export function RiskHeatmap() {
                   <div>Critical: <span style="color:#ef4444;font-weight:600">${cell?.criticalCount ?? 0}</span></div>
                 `
                 )
-                .style('left', `${event.offsetX + 12}px`)
-                .style('top', `${event.offsetY - 10}px`)
+                .style('left', `${(event as MouseEvent).offsetX + 16}px`)
+                .style('top', `${(event as MouseEvent).offsetY - 10}px`)
             })
             .on('mousemove', function (event) {
               tooltip
-                .style('left', `${event.offsetX + 12}px`)
-                .style('top', `${event.offsetY - 10}px`)
+                .style('left', `${(event as MouseEvent).offsetX + 16}px`)
+                .style('top', `${(event as MouseEvent).offsetY - 10}px`)
             })
             .on('mouseout', function () {
-              d3.select(this).attr('stroke', '#1e2a45').attr('stroke-width', 1)
-              tooltip.style('opacity', 0)
+              d3.select(this).attr('stroke', '#0a0e1a').attr('stroke-width', 2)
+              tooltip.style('opacity', '0')
             })
-        }
 
-        // Risk number label
-        if (risk > 0) {
-          g.append('text')
-            .attr('x', (x(exam) ?? 0) + x.bandwidth() / 2)
-            .attr('y', (y(country) ?? 0) + y.bandwidth() / 2 + 4)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '10px')
-            .attr('font-family', 'monospace')
-            .attr('fill', risk > 50 ? '#fff' : '#94a3b8')
-            .attr('pointer-events', 'none')
-            .text(risk)
+          // Score label
+          if (cellSize > 30) {
+            g.append('text')
+              .attr('x', (x(exam) ?? 0) + x.bandwidth() / 2)
+              .attr('y', (y(country) ?? 0) + y.bandwidth() / 2 + 4)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '10px')
+              .attr('font-family', 'monospace')
+              .attr('fill', risk > 50 ? 'rgba(255,255,255,0.9)' : '#94a3b8')
+              .attr('pointer-events', 'none')
+              .text(risk)
+          }
         }
       })
     })
 
-    // X axis — exam names
+    // Y axis
     g.append('g')
-      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisLeft(y).tickSize(0))
+      .call((axis) => axis.select('.domain').remove())
+      .call((axis) =>
+        axis
+          .selectAll('text')
+          .style('fill', '#94a3b8')
+          .style('font-size', '11px')
+          .attr('dx', '-8px')
+      )
+
+    // X axis — rotated labels
+    g.append('g')
+      .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickSize(0))
-      .select('.domain')
-      .remove()
-
-    g.selectAll('.tick text')
-      .style('fill', '#64748b')
-      .style('font-size', '10px')
-      .attr('dy', '1.2em')
-      .call((sel) => {
-        sel.each(function () {
-          const text = d3.select(this)
-          const words = (text.text() || '').split(' ')
-          text.text(null)
-          words.forEach((word, i) => {
-            text
-              .append('tspan')
-              .attr('x', 0)
-              .attr('dy', i === 0 ? '1.2em' : '1.1em')
-              .text(word)
-          })
-        })
-      })
-
-    // Y axis — countries
-    g.append('g').call(d3.axisLeft(y).tickSize(0)).select('.domain').remove()
-
-    g.selectAll('.tick text')
-      .style('fill', '#94a3b8')
-      .style('font-size', '11px')
-      .attr('dx', '-8px')
+      .call((axis) => axis.select('.domain').remove())
+      .call((axis) =>
+        axis
+          .selectAll('text')
+          .style('fill', '#64748b')
+          .style('font-size', '11px')
+          .attr('dy', '0.5em')
+          .attr('dx', '-0.8em')
+          .attr('transform', 'rotate(-40)')
+          .style('text-anchor', 'end')
+      )
 
     // Tooltip
-    const tooltipEl = svgRef.current.parentElement
     const tooltip = d3
-      .select(tooltipEl)
+      .select(containerRef.current)
       .selectAll<HTMLDivElement, unknown>('.heatmap-tooltip')
       .data([null])
       .join('div')
@@ -229,8 +226,8 @@ export function RiskHeatmap() {
   if (sessions.length === 0) return null
 
   return (
-    <div style={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
-      <svg ref={svgRef} />
+    <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+      <svg ref={svgRef} style={{ display: 'block', width: '100%' }} />
     </div>
   )
 }

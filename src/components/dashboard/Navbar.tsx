@@ -16,27 +16,84 @@ export function Navbar() {
   const view = useAppSelector(selectPanelView)
   const stats = useAppSelector(selectDashboardStats)
   const pathname = usePathname()
+  const isMonitor = pathname === '/'
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-      <div className="flex h-14 items-center justify-between px-4 md:px-6">
-        {/* Logo */}
-        {/* Logo + nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-[var(--accent-blue)]" />
-            <span className="font-semibold tracking-tight text-[var(--text-primary)]">
+    <header
+      role="banner"
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        borderBottom: '1px solid var(--border-subtle)',
+        backgroundColor: 'var(--bg-secondary)',
+      }}
+    >
+      {/* Main row */}
+      <div
+        style={{
+          display: 'flex',
+          height: '52px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          gap: '12px',
+        }}
+      >
+        {/* Left — logo + nav */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            minWidth: 0,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexShrink: 0,
+            }}
+          >
+            <Shield
+              aria-hidden="true"
+              style={{ width: 18, height: 18, color: 'var(--accent-blue)' }}
+            />
+            <span
+              style={{
+                fontWeight: 600,
+                fontSize: '15px',
+                color: 'var(--text-primary)',
+              }}
+            >
               ExamGuard
             </span>
             {stats.criticalSessions > 0 && (
-              <span className="rounded-full bg-[var(--status-critical)] px-2 py-0.5 text-xs font-medium text-white">
+              <span
+                role="status"
+                aria-live="polite"
+                aria-label={`${stats.criticalSessions} critical sessions`}
+                style={{
+                  backgroundColor: 'var(--status-critical)',
+                  color: 'white',
+                  borderRadius: '9999px',
+                  padding: '2px 8px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
                 {stats.criticalSessions} critical
               </span>
             )}
           </div>
 
-          {/* Nav links */}
-          <nav style={{ display: 'flex', gap: '4px' }}>
+          <nav
+            aria-label="Main navigation"
+            style={{ display: 'flex', gap: '2px' }}
+          >
             {[
               { href: '/', label: 'Monitor' },
               { href: '/analytics', label: 'Analytics' },
@@ -44,8 +101,9 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={pathname === link.href ? 'page' : undefined}
                 style={{
-                  padding: '4px 12px',
+                  padding: '4px 10px',
                   borderRadius: '6px',
                   fontSize: '13px',
                   fontWeight: 500,
@@ -59,6 +117,7 @@ export function Navbar() {
                       ? 'var(--text-primary)'
                       : 'var(--text-muted)',
                   transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {link.label}
@@ -67,65 +126,148 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* Center — quick stats */}
-        <div className="hidden items-center gap-6 text-xs md:flex">
-          {[
-            { label: 'Total', value: stats.totalSessions },
-            { label: 'Active', value: stats.activeSessions },
-            { label: 'Flagged', value: stats.flaggedSessions },
-            { label: 'Avg Risk', value: `${stats.avgRiskScore}%` },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="font-semibold text-[var(--text-primary)]">
-                {s.value}
-              </p>
-              <p className="text-[var(--text-muted)]">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Right controls */}
-        <div className="flex items-center gap-3">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            flexShrink: 0,
+          }}
+        >
           <ConnectionStatus />
 
-          {/* View toggle */}
-          <div className="flex overflow-hidden rounded-md border border-[var(--border-default)]">
-            <button
-              onClick={() => dispatch(setPanelView('grid'))}
-              className={cn(
-                'p-1.5 transition-colors',
-                view === 'grid'
-                  ? 'bg-[var(--accent-blue)] text-white'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              )}
-              aria-label="Grid view"
+          {/* View toggle — monitor only */}
+          {isMonitor && (
+            <div
+              role="group"
+              aria-label="View mode"
+              style={{
+                display: 'flex',
+                borderRadius: '6px',
+                border: '1px solid var(--border-default)',
+                overflow: 'hidden',
+              }}
             >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => dispatch(setPanelView('list'))}
-              className={cn(
-                'p-1.5 transition-colors',
-                view === 'list'
-                  ? 'bg-[var(--accent-blue)] text-white'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              )}
-              aria-label="List view"
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
+              {[
+                {
+                  mode: 'grid' as const,
+                  icon: <LayoutGrid style={{ width: 14, height: 14 }} />,
+                  label: 'Grid view',
+                },
+                {
+                  mode: 'list' as const,
+                  icon: <List style={{ width: 14, height: 14 }} />,
+                  label: 'List view',
+                },
+              ].map(({ mode, icon, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => dispatch(setPanelView(mode))}
+                  aria-label={label}
+                  aria-pressed={view === mode}
+                  style={{
+                    padding: '6px 8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor:
+                      view === mode ? 'var(--accent-blue)' : 'transparent',
+                    color: view === mode ? 'white' : 'var(--text-muted)',
+                    transition: 'all 0.15s',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          )}
 
           <button
-            className="relative p-1.5 text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             aria-label="Notifications"
+            style={{
+              position: 'relative',
+              padding: '6px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              borderRadius: '6px',
+            }}
           >
-            <Bell className="h-4 w-4" />
+            <Bell style={{ width: 16, height: 16 }} />
             {stats.criticalSessions > 0 && (
-              <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-[var(--status-critical)]" />
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  right: '4px',
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--status-critical)',
+                }}
+              />
             )}
           </button>
         </div>
+      </div>
+
+      {/* Mobile stats bar */}
+      <div
+        role="region"
+        aria-label="Dashboard summary"
+        style={{
+          display: 'flex',
+          gap: '16px',
+          padding: '6px 16px',
+          borderTop: '1px solid var(--border-subtle)',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+        }}
+      >
+        {[
+          { label: 'Total', value: stats.totalSessions.toLocaleString() },
+          {
+            label: 'Active',
+            value: stats.activeSessions.toLocaleString(),
+            color: 'var(--status-active)',
+          },
+          {
+            label: 'Flagged',
+            value: stats.flaggedSessions.toLocaleString(),
+            color: 'var(--status-warning)',
+          },
+          {
+            label: 'Critical',
+            value: stats.criticalSessions.toLocaleString(),
+            color: 'var(--risk-critical)',
+          },
+          { label: 'Avg Risk', value: `${stats.avgRiskScore}%` },
+        ].map((s) => (
+          <div key={s.label} style={{ flexShrink: 0, textAlign: 'center' }}>
+            <p
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: s.color || 'var(--text-primary)',
+              }}
+            >
+              {s.value}
+            </p>
+            <p
+              style={{
+                fontSize: '10px',
+                color: 'var(--text-muted)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {s.label}
+            </p>
+          </div>
+        ))}
       </div>
     </header>
   )

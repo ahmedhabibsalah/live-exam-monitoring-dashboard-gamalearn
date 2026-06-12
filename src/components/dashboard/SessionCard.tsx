@@ -3,7 +3,7 @@
 import { Flag, Clock, Wifi, WifiOff } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { RiskBadge } from '@/components/ui/RiskBadge'
-import { formatDuration, formatTimestamp, cn } from '@/lib/utils'
+import { formatDuration, formatTimestamp } from '@/lib/utils'
 import type { ExamSession } from '@/types'
 
 interface Props {
@@ -18,60 +18,140 @@ export function SessionCard({ session, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className={cn(
-        'w-full rounded-lg border bg-[var(--bg-elevated)] p-4 text-left transition-all duration-200',
-        'hover:border-[var(--accent-blue)] hover:bg-[var(--bg-tertiary)]',
-        'focus:ring-1 focus:ring-[var(--accent-blue)] focus:outline-none',
-        isCritical
-          ? 'glow-critical border-[var(--risk-critical)]/40'
-          : 'border-[var(--border-subtle)]'
-      )}
+      aria-label={`Session: ${session.candidate.name}, ${session.status}, risk ${session.riskScore}`}
+      style={{
+        width: '100%',
+        borderRadius: '8px',
+        border: `1px solid ${isCritical ? 'rgba(239,68,68,0.4)' : 'var(--border-subtle)'}`,
+        backgroundColor: 'var(--bg-elevated)',
+        padding: '14px 16px',
+        textAlign: 'left',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        boxShadow: isCritical ? '0 0 12px rgba(239,68,68,0.15)' : 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--accent-blue)'
+        e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = isCritical
+          ? 'rgba(239,68,68,0.4)'
+          : 'var(--border-subtle)'
+        e.currentTarget.style.backgroundColor = 'var(--bg-elevated)'
+      }}
     >
-      {/* Header */}
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[var(--text-primary)]">
+      {/* Header — name + wifi icon */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '8px',
+          width: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <p
+            style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
+            }}
+          >
             {session.candidate.name}
           </p>
-          <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--text-muted)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
+              marginTop: '2px',
+            }}
+          >
             {session.candidate.country} · {session.examName}
           </p>
         </div>
-        <div className="shrink-0">
+        <div style={{ flexShrink: 0, paddingTop: '2px' }}>
           {isDisconnected ? (
-            <WifiOff className="h-4 w-4 text-[var(--status-disconnected)]" />
+            <WifiOff
+              style={{
+                width: 14,
+                height: 14,
+                color: 'var(--status-disconnected)',
+              }}
+            />
           ) : (
-            <Wifi className="h-4 w-4 text-[var(--status-active)] opacity-50" />
+            <Wifi
+              style={{
+                width: 14,
+                height: 14,
+                color: 'var(--status-active)',
+                opacity: 0.5,
+              }}
+            />
           )}
         </div>
       </div>
 
       {/* Status + Risk */}
-      <div className="mb-3 flex items-center justify-between">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '8px',
+        }}
+      >
         <StatusBadge status={session.status} />
         <RiskBadge level={session.riskLevel} score={session.riskScore} />
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-        <div className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '12px',
+          color: 'var(--text-muted)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Clock style={{ width: 12, height: 12 }} />
           <span>{formatDuration(session.duration)}</span>
         </div>
         {session.flagCount > 0 && (
           <div
-            className={cn(
-              'flex items-center gap-1',
-              session.criticalFlagCount > 0 && 'text-[var(--risk-critical)]'
-            )}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              color:
+                session.criticalFlagCount > 0
+                  ? 'var(--risk-critical)'
+                  : 'var(--text-muted)',
+            }}
           >
-            <Flag className="h-3 w-3" />
+            <Flag style={{ width: 12, height: 12 }} />
             <span>
               {session.flagCount} flag{session.flagCount !== 1 ? 's' : ''}
             </span>
           </div>
         )}
-        <span className="font-mono">
+        <span style={{ fontFamily: 'monospace' }}>
           {formatTimestamp(session.lastEventAt)}
         </span>
       </div>

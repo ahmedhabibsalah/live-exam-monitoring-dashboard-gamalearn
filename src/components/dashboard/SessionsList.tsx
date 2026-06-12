@@ -10,6 +10,7 @@ import { setSelectedSession } from '@/store/slices/sessionsSlice'
 import { setDetailOpen } from '@/store/slices/uiSlice'
 import { SessionCard } from './SessionCard'
 import { SessionRow } from './SessionRow'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 const ROW_HEIGHT = 72
 const CARD_HEIGHT = 152
@@ -34,20 +35,16 @@ export function SessionsList() {
 
   if (sessions.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 py-20 text-center">
-        <p className="text-sm text-[var(--text-secondary)]">
-          No sessions match your filters
-        </p>
-        <p className="text-xs text-[var(--text-muted)]">
-          Try adjusting the search or filter criteria
-        </p>
-      </div>
+      <EmptyState
+        title="No sessions match your filters"
+        description="Try adjusting the search or filter criteria"
+      />
     )
   }
 
   if (view === 'grid') {
     return (
-      <div className="flex-1 overflow-auto p-4">
+      <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px' }}>
         <div
           style={{
             display: 'grid',

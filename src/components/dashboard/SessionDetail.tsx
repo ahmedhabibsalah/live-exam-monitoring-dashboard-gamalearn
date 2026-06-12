@@ -68,7 +68,7 @@ export function SessionDetail() {
           top: 0,
           right: 0,
           height: '100vh',
-          width: '480px',
+          width: 'min(480px, 100vw)',
           maxWidth: '100vw',
           backgroundColor: 'var(--bg-secondary)',
           borderLeft: '1px solid var(--border-subtle)',
