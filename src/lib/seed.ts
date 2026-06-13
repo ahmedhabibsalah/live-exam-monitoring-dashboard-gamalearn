@@ -10,9 +10,8 @@ const supabase = createClient(
 )
 
 async function seed() {
-  console.log('Generating 10,000 sessions...')
-  const { sessions, events } = generateSessions(10000)
-
+  console.log('Generating 15,000 sessions...')
+  const { sessions, events } = generateSessions(15000)
   // Map to DB shape
   const dbSessions = sessions.map((s) => ({
     id: s.id,

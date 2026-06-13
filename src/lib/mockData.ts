@@ -12,6 +12,7 @@ import {
   RISK_SCORE_WEIGHTS,
 } from '@/constants'
 import { getRiskLevel } from '@/lib/utils'
+import { randomUUID } from 'crypto'
 
 const FIRST_NAMES = [
   'Ahmed',
@@ -85,7 +86,7 @@ function randomInt(min: number, max: number): number {
 }
 
 function randomId(): string {
-  return Math.random().toString(36).slice(2, 11)
+  return randomUUID().replace(/-/g, '').slice(0, 16)
 }
 
 function generateCandidate(index: number): Candidate {

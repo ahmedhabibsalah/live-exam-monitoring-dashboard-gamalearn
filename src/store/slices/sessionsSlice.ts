@@ -31,20 +31,14 @@ const sessionsSlice = createSlice({
         events: Record<string, SessionEvent[]>
       }>
     ) {
-      console.log(
-        'HYDRATE called with',
-        action.payload.sessions.length,
-        'sessions'
-      )
-      console.log(
-        'Sample statuses:',
-        action.payload.sessions.slice(0, 5).map((s) => s.status)
-      )
-      console.log(
-        'Sample scores:',
-        action.payload.sessions.slice(0, 5).map((s) => s.riskScore)
-      )
-      state.items = action.payload.sessions
+      // Deduplicate by id
+      const seen = new Set<string>()
+      const unique = action.payload.sessions.filter((s) => {
+        if (seen.has(s.id)) return false
+        seen.add(s.id)
+        return true
+      })
+      state.items = unique
       state.events = action.payload.events
       state.isLoaded = true
     },
