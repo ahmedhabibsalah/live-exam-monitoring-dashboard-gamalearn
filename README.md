@@ -4,7 +4,8 @@
 
 **Live Demo:** https://live-exam-monitoring-dashboard-gama.vercel.app/  
 **Repository:** https://github.com/ahmedhabibsalah/live-exam-monitoring-dashboard-gamalearn  
-**Figma:** <!-- Add Figma URL here -->  
+**Figma:** https://www.figma.com/design/brQ3vqyT2GhU57h9ocaAvU/ExamGuard-%E2%80%94-Design-Process?node-id=3-2322&m=dev&t=eMbkJqqmzUJieit3-1
+
 **Walkthrough Recording:** <!-- Add recording URL here -->
 
 ---
