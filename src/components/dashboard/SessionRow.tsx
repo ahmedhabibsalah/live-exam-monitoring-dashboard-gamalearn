@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { formatDuration, formatTimestamp, cn } from '@/lib/utils'
 import type { ExamSession } from '@/types'
+import { memo } from 'react'
 
 interface Props {
   session: ExamSession
@@ -12,7 +13,11 @@ interface Props {
   style?: React.CSSProperties
 }
 
-export function SessionRow({ session, onClick, style }: Props) {
+export const SessionRow = memo(function SessionRow({
+  session,
+  onClick,
+  style,
+}: Props) {
   const isCritical = session.riskLevel === 'critical'
 
   return (
@@ -165,4 +170,4 @@ export function SessionRow({ session, onClick, style }: Props) {
       )}
     </div>
   )
-}
+})

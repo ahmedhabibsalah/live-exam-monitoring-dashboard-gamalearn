@@ -5,13 +5,17 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { formatDuration, formatTimestamp } from '@/lib/utils'
 import type { ExamSession } from '@/types'
+import { memo } from 'react'
 
 interface Props {
   session: ExamSession
   onClick: () => void
 }
 
-export function SessionCard({ session, onClick }: Props) {
+export const SessionCard = memo(function SessionCard({
+  session,
+  onClick,
+}: Props) {
   const isCritical = session.riskLevel === 'critical'
   const isDisconnected = session.status === 'disconnected'
 
@@ -157,4 +161,4 @@ export function SessionCard({ session, onClick }: Props) {
       </div>
     </button>
   )
-}
+})

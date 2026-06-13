@@ -1,6 +1,7 @@
 'use client'
 
 import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
 import { useAppSelector } from '@/hooks/useAppSelector'
 import {
@@ -13,6 +14,7 @@ import {
   selectFilters,
   selectFilteredSessions,
 } from '@/store/slices/filtersSlice'
+import { useDebounce } from '@/hooks/useDebounce'
 import type { FilterState, SessionStatus, RiskLevel } from '@/types'
 
 const selectStyle: React.CSSProperties = {
@@ -30,8 +32,21 @@ export function FilterBar() {
   const dispatch = useAppDispatch()
   const filters = useAppSelector(selectFilters)
   const filtered = useAppSelector(selectFilteredSessions)
+
+  const [localSearch, setLocalSearch] = useState(filters.search)
+  const debouncedSearch = useDebounce(localSearch, 300)
+
+  useEffect(() => {
+    dispatch(setSearch(debouncedSearch))
+  }, [debouncedSearch, dispatch])
+
   const isFiltered =
-    filters.search || filters.status !== 'all' || filters.riskLevel !== 'all'
+    localSearch || filters.status !== 'all' || filters.riskLevel !== 'all'
+
+  const handleReset = () => {
+    setLocalSearch('')
+    dispatch(resetFilters())
+  }
 
   return (
     <div
@@ -63,8 +78,8 @@ export function FilterBar() {
         <input
           type="search"
           placeholder="Search candidate, exam, country..."
-          value={filters.search}
-          onChange={(e) => dispatch(setSearch(e.target.value))}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           aria-label="Search sessions"
           style={{
             width: '100%',
@@ -78,9 +93,12 @@ export function FilterBar() {
             boxSizing: 'border-box',
           }}
         />
-        {filters.search && (
+        {localSearch && (
           <button
-            onClick={() => dispatch(setSearch(''))}
+            onClick={() => {
+              setLocalSearch('')
+              dispatch(setSearch(''))
+            }}
             aria-label="Clear search"
             style={{
               position: 'absolute',
@@ -215,7 +233,7 @@ export function FilterBar() {
           </span>
           {isFiltered && (
             <button
-              onClick={() => dispatch(resetFilters())}
+              onClick={handleReset}
               aria-label="Reset all filters"
               style={{
                 fontSize: '12px',

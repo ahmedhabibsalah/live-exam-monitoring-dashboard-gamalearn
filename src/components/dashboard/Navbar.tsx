@@ -1,5 +1,6 @@
 'use client'
-
+import { useState } from 'react'
+import { NotificationsDrawer } from './NotificationsDrawer'
 import { Shield, Bell, LayoutGrid, List } from 'lucide-react'
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
@@ -14,6 +15,7 @@ import { usePathname } from 'next/navigation'
 export function Navbar() {
   const dispatch = useAppDispatch()
   const view = useAppSelector(selectPanelView)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const stats = useAppSelector(selectDashboardStats)
   const pathname = usePathname()
   const isMonitor = pathname === '/'
@@ -184,34 +186,48 @@ export function Navbar() {
             </div>
           )}
 
-          <button
-            aria-label="Notifications"
-            style={{
-              position: 'relative',
-              padding: '6px',
-              border: 'none',
-              backgroundColor: 'transparent',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              borderRadius: '6px',
-            }}
-          >
-            <Bell style={{ width: 16, height: 16 }} />
-            {stats.criticalSessions > 0 && (
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  top: '4px',
-                  right: '4px',
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--status-critical)',
-                }}
-              />
-            )}
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button
+              aria-label="Notifications"
+              aria-expanded={notificationsOpen}
+              onClick={() => setNotificationsOpen((prev) => !prev)}
+              style={{
+                position: 'relative',
+                padding: '6px',
+                border: 'none',
+                backgroundColor: notificationsOpen
+                  ? 'var(--bg-elevated)'
+                  : 'transparent',
+                color: notificationsOpen
+                  ? 'var(--text-primary)'
+                  : 'var(--text-muted)',
+                cursor: 'pointer',
+                borderRadius: '6px',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Bell style={{ width: 16, height: 16 }} />
+              {stats.criticalSessions > 0 && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '4px',
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--status-critical)',
+                  }}
+                />
+              )}
+            </button>
+
+            <NotificationsDrawer
+              isOpen={notificationsOpen}
+              onClose={() => setNotificationsOpen(false)}
+            />
+          </div>
         </div>
       </div>
 
