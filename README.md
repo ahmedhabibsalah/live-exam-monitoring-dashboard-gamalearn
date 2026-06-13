@@ -6,7 +6,9 @@
 **Repository:** https://github.com/ahmedhabibsalah/live-exam-monitoring-dashboard-gamalearn  
 **Figma:** https://www.figma.com/design/brQ3vqyT2GhU57h9ocaAvU/ExamGuard-%E2%80%94-Design-Process?node-id=3-2322&m=dev&t=eMbkJqqmzUJieit3-1
 
-**Walkthrough Recording:** <!-- Add recording URL here -->
+**Walkthrough Recording English:** https://drive.google.com/file/d/1HRKt9LORFRvxN2EIsGb6knZ269JaB8Dd/view?usp=sharing
+
+**Walkthrough Recording Arabic:** https://drive.google.com/file/d/1VjgsbSI1etI1h-MchxE1vjDbT7AMOLAK/view?usp=sharing
 
 ---
 
@@ -325,4 +327,3 @@ This project was built with Claude (Anthropic) as an AI assistant. The following
 AI accelerated implementation. All technical decisions, architectural choices, and quality judgments were made by me.
 
 ---
-
