@@ -325,22 +325,3 @@ AI accelerated implementation. All technical decisions, architectural choices, a
 
 ---
 
-## Evaluation Checklist
-
-- ✅ Next.js 14 (App Router) + TypeScript strict
-- ✅ Redux Toolkit with clear server/UI state boundaries
-- ✅ Supabase Realtime WebSocket integration with reconnect handling
-- ✅ 14,937 records with virtualized rendering (grid + list)
-- ✅ Filter, sort, search on operationally useful fields
-- ✅ Session detail with incident timeline and risk breakdown
-- ✅ D3 risk heatmap (edge feature)
-- ✅ Priority alerts + notifications drawer (edge feature)
-- ✅ Desktop and mobile layouts
-- ✅ Accessibility — semantic HTML, aria attributes, keyboard navigation
-- ✅ Loading, empty, and error states
-- ✅ Vitest test suite
-- ✅ Hosted deployment on Vercel
-- ✅ GitHub repository
-- ✅ README with setup, architecture, decisions, tradeoffs, AI usage
-- ⬜ Figma file <!-- Add when complete -->
-- ⬜ Walkthrough recording <!-- Add when complete -->
